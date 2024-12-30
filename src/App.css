@@ -1,3 +1,15 @@
 .buttons > button {
     @apply py-4 px-2;
 }
+
+.buttons > button:not(.equal-btn) {
+    @apply text-lg font-medium hover:bg-slate-200;
+}
+
+.expand-buttons > * {
+    @apply py-4 px-2;
+}
+
+.expand-buttons > button {
+    @apply text-lg hover:bg-white;
+}
