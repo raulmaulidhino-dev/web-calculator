@@ -77,10 +77,6 @@ export const useCalculator = () => {
         setIsExpanding(!isExpanding);
     }
     
-    const handleInputChange = e => {
-        setIsDecimalPointDisabled(false);
-    }
-    
     const handleKeysClick = (label, type) => {
         setIsReadonly(true);
         let lastChar = expression.at(-1);
@@ -110,6 +106,23 @@ export const useCalculator = () => {
             else setExpression([...expression, label]);
         }
     }
+
+    const handleKeyPress =  e => {
+        const key = e.key;
+
+        if (/^[1-9]+$/.test(key)) handleKeysClick(key, "number");
+        else if (/^[0]+$/.test(key)) handleKeysClick(key, "zero");
+        else if (/^[.]+$/.test(key)) handleKeysClick(key, "decimal-point");
+        else if (/^[+\-*/×÷:^]+$/.test(key)) handleKeysClick(key, "operation");
+        else if (/^[%]+$/.test(key)) handleKeysClick(key, "percent");
+        else if (/^[√]+$/.test(key)) handleKeysClick(key, "function");
+        else if (/^[!]+$/.test(key)) handleKeysClick(key, "factorial");
+        else if (/^[πe]+$/.test(key)) handleKeysClick(key, "constant");
+        else if (/^[()]+$/.test(key)) handleKeysClick(key, "property");
+        else if (key === "Tab") handleExpand();
+        else if (key === "Enter") calculate();
+        else if (key === "Backspace") setExpression([...expression.slice(0, -1)]);
+    }
     
     const handleParentheses = exp => {
         let openCount = 0;
@@ -134,6 +147,7 @@ export const useCalculator = () => {
         return exp
             .replace(/×/g, '*')
             .replace(/÷/g, '/')
+            .replace(/:/g, '/')
             .replace(/√/g, 'sqrt')
             .replace(/log/g, 'log10')
             .replace(/ln/g, 'log')
@@ -160,6 +174,7 @@ export const useCalculator = () => {
         primaryKeys,
         secondaryKeys,
         handleKeysClick,
+        handleKeyPress,
         isExpanding,
         handleExpand,
         isDeg,
@@ -170,7 +185,6 @@ export const useCalculator = () => {
         isDecimalPointDisabled,
         isReadonly,
         enableKeyboard,
-        handleInputChange,
         calculate,    
     };
 };

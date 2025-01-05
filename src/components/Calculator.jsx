@@ -7,6 +7,7 @@ const Calculator = () => {
         primaryKeys,
         secondaryKeys,
         handleKeysClick,
+        handleKeyPress,
         isExpanding,
         handleExpand,
         isDeg,
@@ -17,7 +18,6 @@ const Calculator = () => {
         isDecimalPointDisabled,
         isReadonly,
         enableKeyboard,
-        handleInputChange,
         calculate,
     } = useCalculator();
 
@@ -32,7 +32,7 @@ const Calculator = () => {
                         className="w-full text-right text-2xl py-4 overflow-x-auto focus:outline-none focus:ring-0 focus:border-0"
                         ref={ inputRef }
                         value={ expression.join("") }
-                        onChange={ handleInputChange }
+                        onKeyDown={ handleKeyPress }
                         onClick={ enableKeyboard }
                         readOnly={ isReadonly }
                 />
