@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { evaluate } from 'mathjs'
+import { evaluate, format } from 'mathjs'
 
 export const useCalculator = () => {
     // Input Reference
@@ -83,7 +83,7 @@ export const useCalculator = () => {
         if (type === "operation") {
             if (isNaN(Number(lastChar)) && lastChar !== "e" && lastChar !== "π") {
                 if (lastChar === "√" || expression.length === 0) setExpression([...expression]);
-                else if (lastChar === "%" || label === "-" && lastChar !== "-") setExpression([...expression, label]);
+                else if (lastChar === "%" || (label === "-" && lastChar === "(") || lastChar === ")") setExpression([...expression, label]);
                 else setExpression([...expression.slice(0, -1), label]);
             }
             else setExpression([...expression, label]);
@@ -101,8 +101,11 @@ export const useCalculator = () => {
             }
         } else if (type === "function") {
             setExpression([...expression, label + "("]);
+        } else if (type === "property" && label === ")") {
+            if (isNaN(Number(lastChar)) && lastChar !== "!" && lastChar !== "%") setExpression([...expression]);
+            else setExpression([...expression, label]);
         } else {
-            if (lastChar === "Error!") setExpression([label]);
+            if (lastChar === "Error!" || lastChar === "Infinity" || lastChar === "∞") setExpression([label]);
             else setExpression([...expression, label]);
         }
     }
@@ -160,7 +163,9 @@ export const useCalculator = () => {
         let exp2 = preprocessExp(exp1);
     
         try {
-            const result = evaluate(exp2);
+            let result = evaluate(exp2);
+            result = format(result, { precision: 15 });
+
             setExpression([result]);
             setCurrentCalculationVal(exp1);
             setIsDecimalPointDisabled(false);
