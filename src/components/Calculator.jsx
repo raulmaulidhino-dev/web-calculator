@@ -29,7 +29,7 @@ const Calculator = () => {
             <div class="bg-white p-6 pt-0">
                 <div className="text-slate-500 text-right">{ currentCalculationVal }</div>
                 <input type="text" 
-                        class="w-full text-right text-2xl py-4 overflow-x-auto focus:outline-none focus:ring-0 focus:border-0"
+                        className="w-full text-right text-2xl py-4 overflow-x-auto focus:outline-none focus:ring-0 focus:border-0"
                         ref={ inputRef }
                         value={ expression.join("") }
                         onChange={ handleInputChange }
