@@ -111,7 +111,7 @@ export const useCalculator = () => {
         }
     }
     
-    const autoCompleteParentheses = exp => {
+    const handleParentheses = exp => {
         let openCount = 0;
         let closeCount = 0;
     
@@ -123,6 +123,9 @@ export const useCalculator = () => {
         const missingClose = openCount - closeCount;
     
         if (missingClose > 0) exp += ')'.repeat(missingClose);
+        else if (missingClose < 0) exp = '('.repeat(Math.abs(missingClose)) + exp;
+
+        exp = exp.replace("()", "");
     
         return exp;
     }
@@ -139,7 +142,7 @@ export const useCalculator = () => {
     }
     
     const calculate = () => {
-        let exp1 = autoCompleteParentheses(expression.join(""));
+        let exp1 = handleParentheses(expression.join(""));
         let exp2 = preprocessExp(exp1);
     
         try {
