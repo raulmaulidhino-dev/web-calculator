@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { evaluate, format } from 'mathjs'
+import { format, create, all } from 'mathjs'
 
 export const useCalculator = () => {
     // Input Reference
@@ -50,6 +50,27 @@ export const useCalculator = () => {
     const [isDecimalPointDisabled, setIsDecimalPointDisabled] = useState(false);
     const [isReadonly, setIsReadonly] = useState(true);
     const [currentCalculationVal, setCurrentCalculationVal] = useState("    ");
+
+    const math = create(all);
+
+    math.import({
+        divide: (a, b) => {
+            if (b === 0) return "Cannot be divided by Zero!";
+            else return a / b;
+        },
+        sin: angle => {
+            angle = isDeg ? ((angle / 360) * 2 * Math.PI) : angle;
+
+            if (Number.isInteger(angle / Math.PI)) return 0;
+            return Math.sin(angle);
+        },
+        cos: angle => {
+            angle = isDeg ? ((angle / 360) * 2 * Math.PI) : angle;
+
+            if (Number.isInteger(angle / (Math.PI/2)) && (angle / (Math.PI/2) % 2) !== 0) return 0;
+            return Math.cos(angle);
+        }
+    }, {override: true});
     
     const focusInputAtEnd = () => {
         if (inputRef.current) {
@@ -101,11 +122,11 @@ export const useCalculator = () => {
             }
         } else if (type === "function") {
             setExpression([...expression, label + "("]);
-        } else if (type === "property" && label === ")") {
-            if (isNaN(Number(lastChar)) && lastChar !== "!" && lastChar !== "%") setExpression([...expression]);
+        } else if (type === "property") {
+            if (lastChar === '.') setExpression([...expression]);
             else setExpression([...expression, label]);
         } else {
-            if (lastChar === "Error!" || lastChar === "Infinity" || lastChar === "∞") setExpression([label]);
+            if (lastChar === "Error!" || lastChar === "Infinity" || lastChar === "Cannot be divided by Zero!") setExpression([label]);
             else setExpression([...expression, label]);
         }
     }
@@ -152,6 +173,9 @@ export const useCalculator = () => {
             .replace(/÷/g, '/')
             .replace(/:/g, '/')
             .replace(/√/g, 'sqrt')
+            // .replace(/sin/g, 'math.sin')
+            // .replace(/cos/g, 'math.cos')
+            // .replace(/tan/g, 'math.tan')
             .replace(/log/g, 'log10')
             .replace(/ln/g, 'log')
             .replace(/π/g, ' pi ')
@@ -163,7 +187,7 @@ export const useCalculator = () => {
         let exp2 = preprocessExp(exp1);
     
         try {
-            let result = evaluate(exp2);
+            let result = math.evaluate(exp2);
             result = format(result, { precision: 15 });
 
             setExpression([result]);
