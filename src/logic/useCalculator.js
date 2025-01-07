@@ -67,7 +67,7 @@ export const useCalculator = () => {
         cos: angle => {
             angle = isDeg ? ((angle / 360) * 2 * Math.PI) : angle;
 
-            if (Number.isInteger(angle / (Math.PI/2)) && (angle / (Math.PI/2) % 2) !== 0) return 0;
+            if (Number.isInteger(Math.round(angle / (Math.PI/2))) && (Math.round(angle / (Math.PI/2)) % 2) !== 0) return 0;
             return Math.cos(angle);
         }
     }, {override: true});
@@ -122,8 +122,11 @@ export const useCalculator = () => {
             }
         } else if (type === "function") {
             setExpression([...expression, label + "("]);
-        } else if (type === "property") {
+        } else if (type === "property" && label === "(") {
             if (lastChar === '.') setExpression([...expression]);
+            else setExpression([...expression, label]);
+        } else if (type === "property" && label === ")") {
+            if (expression.length === 0 || lastChar === '.' || lastChar === "+" || lastChar === '-' || lastChar === "×" || lastChar === "÷" || lastChar === "^") setExpression([...expression]);
             else setExpression([...expression, label]);
         } else {
             if (lastChar === "Error!" || lastChar === "Infinity" || lastChar === "Cannot be divided by Zero!") setExpression([label]);
@@ -173,9 +176,6 @@ export const useCalculator = () => {
             .replace(/÷/g, '/')
             .replace(/:/g, '/')
             .replace(/√/g, 'sqrt')
-            // .replace(/sin/g, 'math.sin')
-            // .replace(/cos/g, 'math.cos')
-            // .replace(/tan/g, 'math.tan')
             .replace(/log/g, 'log10')
             .replace(/ln/g, 'log')
             .replace(/π/g, ' pi ')
