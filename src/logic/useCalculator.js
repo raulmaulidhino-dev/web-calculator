@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
-import { format, create, all } from 'mathjs'
+import { create, all } from 'mathjs'
+import { Decimal } from 'decimal.js'
+
 
 export const useCalculator = () => {
     // Input Reference
@@ -43,7 +45,7 @@ export const useCalculator = () => {
     
     // Set Expanding & Degree Status
     const [isExpanding, setIsExpanding] = useState(false);
-    const [isDeg, setIsDeg] = useState(true);
+    const [isDeg, setIsDeg] = useState(false);
     
     // Set Expression, Decimal Point, Read-Only and Current Calculation Value Status
     const [expression, setExpression] = useState([]);
@@ -53,24 +55,70 @@ export const useCalculator = () => {
 
     const math = create(all);
 
-    math.import({
-        divide: (a, b) => {
-            if (b === 0) return "Cannot be divided by Zero!";
-            else return a / b;
-        },
-        sin: angle => {
-            angle = isDeg ? ((angle / 360) * 2 * Math.PI) : angle;
+    Decimal.set({ precision: 100 });
 
-            if (Number.isInteger(angle / Math.PI)) return 0;
-            return Math.sin(angle);
-        },
-        cos: angle => {
-            angle = isDeg ? ((angle / 360) * 2 * Math.PI) : angle;
+    math.pi = Decimal.acos(-1);
+    math.e = new Decimal(1).naturalExponential();
 
-            if (Number.isInteger(Math.round(angle / (Math.PI/2))) && (Math.round(angle / (Math.PI/2)) % 2) !== 0) return 0;
-            return Math.cos(angle);
-        }
-    }, {override: true});
+    math.add = (x, y) => {
+        return new Decimal(String(x)).add(new Decimal(String(y)));
+    }
+    
+    math.subtract = (x, y) => {
+        return new Decimal(String(x)).sub(new Decimal(String(y)));
+    }
+
+    math.multiply = (x, y) => {
+        return new Decimal(String(x)).mul(new Decimal(String(y)));
+    }
+
+    math.divide = (x, y) => {
+        if (y === 0) return "Cannot be divided by Zero!";
+        else return new Decimal(String(x)).div(new Decimal(String(y)));
+    }
+
+    math.pow = (x, y) => {
+        return new Decimal(String(x)).pow(new Decimal(String(y)));
+    }
+
+    math.sqrt = x => {
+        return new Decimal(String(x)).sqrt();
+    }
+
+    math.sin = x => {
+        x = isDeg ? math.multiply(math.multiply(math.divide(x, 360), 2), math.pi) : x;
+        if (parseInt(math.divide(x, math.pi)) == math.divide(x, math.pi)) return Decimal(0);
+        return new Decimal(String(x)).sin();
+    }
+
+    math.cos = x => {
+        x = isDeg ? math.multiply(math.multiply(math.divide(x, 360), 2), math.pi) : x;
+        if (parseInt(math.divide(math.multiply(x, "2"), math.pi)) == math.divide(math.multiply(x, "2"), math.pi)) {
+            if (math.divide(math.multiply(x, "2"), math.pi) % 2 !== 0) return Decimal(0);
+        };
+        return new Decimal(String(x)).cos();
+    }
+
+    math.tan = x => {
+        x = isDeg ? math.multiply(math.multiply(math.divide(x, 360), 2), math.pi) : x;
+        if (math.cos(x) == 0) return "Cannot be divided by Zero!";
+        return new Decimal(String(x)).tan();
+    }
+
+    math.log = x => {
+        return new Decimal(String(x)).ln();
+    }
+
+    math.log10 = x => {
+        return new Decimal(String(x)).log();
+    }
+
+    math.factorial = x => {
+        if (x < 0 || !Number.isInteger(x)) return "Error!";
+        else if (x === 0 || x === 1) return 1;
+        else return math.multiply(x, math.factorial(x - 1));
+    }
+
     
     const focusInputAtEnd = () => {
         if (inputRef.current) {
@@ -183,15 +231,14 @@ export const useCalculator = () => {
     }
     
     const calculate = () => {
-        let exp1 = handleParentheses(expression.join(""));
-        let exp2 = preprocessExp(exp1);
+        const exp1 = handleParentheses(expression.join(""));
+        const exp2 = preprocessExp(exp1);
     
         try {
-            let result = math.evaluate(exp2);
-            result = format(result, { precision: 15 });
+            const result = math.evaluate(exp2);
 
             setExpression([result]);
-            setCurrentCalculationVal(exp1);
+            setCurrentCalculationVal(exp2);
             setIsDecimalPointDisabled(false);
         } catch (error) {
             setExpression(["Error!"]);
