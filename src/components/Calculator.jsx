@@ -26,7 +26,7 @@ const Calculator = () => {
             <section className="text- bg-slate-200 rounded-t-[10px] p-6 mb-4">
                 <h1 className="text-xl font-title font-semibold">WEB CALCULATOR</h1>
             </section>
-            <div class="bg-white p-6 pt-0">
+            <div className="bg-white p-6 pt-0">
                 <div className="text-slate-500 text-right">{ currentCalculationVal }</div>
                 <input type="text" 
                         className="w-full text-right text-2xl py-4 overflow-x-auto focus:outline-none focus:ring-0 focus:border-0"
